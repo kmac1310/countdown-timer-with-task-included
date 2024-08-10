@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1440Time Management Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            text-align: center;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        #time1440, #taskTimer {
+            font-size: 2em;
+            margin: 10px 0;
+        }
+        #standardTime {
+            font-size: 1em;
+            color: #666;
+        }
+        input, button {
+            margin: 5px;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>1440Time Management Tool</h1>
+        <div id="time1440">1440 Minutes Remaining</div>
+        <div id="standardTime"></div>
+        <div id="taskTimer">No active task</div>
+        <input type="text" id="taskName" placeholder="Task Name">
+        <input type="number" id="taskDuration" placeholder="Duration (minutes)">
+        <button onclick="startTask()">Start Task</button>
+    </div>
+
+    <script>
+        let taskInterval;
+        let taskEndTime;
+
+        function updateTime() {
+            const now = new Date();
+            const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
+            const minutesLeft = Math.floor((midnight - now) / 60000);
+            
+            document.getElementById('time1440').textContent = `${minutesLeft} Minutes Remaining`;
+            document.getElementById('standardTime').textContent = now.toLocaleTimeString();
+
+            // Update task timer if a task is active
+            if (taskEndTime) {
+                const taskTimeLeft = Math.max(0, Math.floor((taskEndTime - now) / 1000));
+                if (taskTimeLeft > 0) {
+                    const minutes = Math.floor(taskTimeLeft / 60);
+                    const seconds = taskTimeLeft % 60;
+                    document.getElementById('taskTimer').textContent = 
+                        `${document.getElementById('taskName').value}: ${minutes}m ${seconds}s left`;
+                } else {
+                    document.getElementById('taskTimer').textContent = "Task Completed!";
+                    taskEndTime = null;
+                    setTimeout(() => {
+                        document.getElementById('taskTimer').textContent = "No active task";
+                    }, 3000);
+                }
+            }
+        }
+
+        function startTask() {
+            const taskName = document.getElementById('taskName').value;
+            const duration = parseInt(document.getElementById('taskDuration').value);
+
+            if (!taskName || isNaN(duration) || duration <= 0) {
+                alert("Please enter a valid task name and duration.");
+                return;
+            }
+
+            const now = new Date();
+            taskEndTime = new Date(now.getTime() + duration * 60000);
+
+            // Immediate update for responsive UI
+            updateTime();
+        }
+
+        // Update time every second
+        setInterval(updateTime, 1000);
+
+        // Initial update
+        updateTime();
+    </script>
+</body>
+</html>
